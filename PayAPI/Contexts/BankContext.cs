@@ -12,10 +12,14 @@ namespace PayAPI.Models
         {
 
         }
+        public DbSet<Token> Tokens { get; set; }
+
         public DbSet<Card> Cards { get; set; }
         public DbSet<Device> Devices { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
+
+        public DbSet<Log> Logs { get; set; }
 
     }
 }

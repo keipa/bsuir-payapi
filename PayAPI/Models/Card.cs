@@ -12,8 +12,12 @@ namespace PayAPI.Models
         public string CardId { get; set; }
         public int CVV { get; set; }
 
-        public List<Device> DevicesConnected { get; set; }
+        public Dictionary<Device, bool> DevicesConnected { get; set; } // authorized devices(device/isactivated)
 
         public decimal Balance { get; set; }
+
+        public bool connected { get; set; }
+
+        public int AuthorizationCode { get; set; }
     }
 }

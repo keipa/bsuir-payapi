@@ -10,11 +10,12 @@ namespace PayAPI.Models
 
         public DateTime Requseted { get; set; }
         public DateTime Executed { get; set; }
+        public Device UseDevice { get; set; }
+        public Card from { get; set; }
 
-        public Device from { get; set; }
-
-        public User to { get; set; }
+        public Card to { get; set; }
 
         public decimal amount { get; set; }
+
     }
 }

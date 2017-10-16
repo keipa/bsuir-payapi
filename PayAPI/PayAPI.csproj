@@ -184,10 +184,14 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\ValuesController.cs" />
+    <Compile Include="Controllers\BankController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="InputModels\AuthorizationInfo.cs" />
+    <Compile Include="InputModels\CardInfo.cs" />
+    <Compile Include="InputModels\InstanceInfo.cs" />
+    <Compile Include="InputModels\NewTransaction.cs" />
     <Compile Include="Migrations\201710161148248_InitialCreate.cs" />
     <Compile Include="Migrations\201710161148248_InitialCreate.Designer.cs">
       <DependentUpon>201710161148248_InitialCreate.cs</DependentUpon>
@@ -196,11 +200,17 @@
     <Compile Include="Migrations\201710161200427_init.Designer.cs">
       <DependentUpon>201710161200427_init.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201710161354091_tokens.cs" />
+    <Compile Include="Migrations\201710161354091_tokens.Designer.cs">
+      <DependentUpon>201710161354091_tokens.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Bank.cs" />
     <Compile Include="Contexts\BankContext.cs" />
     <Compile Include="Models\Card.cs" />
     <Compile Include="Models\Device.cs" />
+    <Compile Include="Models\Log.cs" />
+    <Compile Include="Models\Token.cs" />
     <Compile Include="Models\Transaction.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -259,6 +269,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="OutputModels\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
@@ -279,6 +290,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201710161200427_init.resx">
       <DependentUpon>201710161200427_init.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201710161354091_tokens.resx">
+      <DependentUpon>201710161354091_tokens.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

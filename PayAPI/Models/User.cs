@@ -8,6 +8,9 @@ namespace PayAPI.Models
         [Key]
         public int Id { get; set; }
 
+        public string email { get; set; }
+        public string phone { get; set; }
+
         public string Name { get; set; }
         public List<Card> UserCards { get; set; }
         public List<Device> OwnedDevices { get; set; }
