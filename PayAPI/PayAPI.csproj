@@ -183,8 +183,11 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
+    <Compile Include="Business\ClientProcesses.cs" />
+    <Compile Include="Business\ServiceProcesses.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\BankController.cs" />
+    <Compile Include="Controllers\ServiceController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -192,6 +195,7 @@
     <Compile Include="InputModels\CardInfo.cs" />
     <Compile Include="InputModels\InstanceInfo.cs" />
     <Compile Include="InputModels\NewTransaction.cs" />
+    <Compile Include="InputModels\RequestedCards.cs" />
     <Compile Include="Migrations\201710161148248_InitialCreate.cs" />
     <Compile Include="Migrations\201710161148248_InitialCreate.Designer.cs">
       <DependentUpon>201710161148248_InitialCreate.cs</DependentUpon>
@@ -204,6 +208,10 @@
     <Compile Include="Migrations\201710161354091_tokens.Designer.cs">
       <DependentUpon>201710161354091_tokens.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201710161818134_logs.cs" />
+    <Compile Include="Migrations\201710161818134_logs.Designer.cs">
+      <DependentUpon>201710161818134_logs.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Bank.cs" />
     <Compile Include="Contexts\BankContext.cs" />
@@ -213,6 +221,7 @@
     <Compile Include="Models\Token.cs" />
     <Compile Include="Models\Transaction.cs" />
     <Compile Include="Models\User.cs" />
+    <Compile Include="OutputModels\CardValues.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -269,7 +278,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="OutputModels\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
@@ -293,6 +301,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201710161354091_tokens.resx">
       <DependentUpon>201710161354091_tokens.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201710161818134_logs.resx">
+      <DependentUpon>201710161818134_logs.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

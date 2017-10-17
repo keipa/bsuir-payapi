@@ -10,7 +10,6 @@ namespace PayAPI.Migrations
         public Configuration()
         {
             AutomaticMigrationsEnabled = false;
-            ContextKey = "PayAPI.Models.BankContext";
         }
 
         protected override void Seed(PayAPI.Models.BankContext context)

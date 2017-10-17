@@ -7,25 +7,27 @@ using System.Web.Http;
 using Microsoft.ApplicationInsights.Extensibility.Implementation;
 using PayAPI.InputModels;
 using PayAPI.Models;
+using PayAPI.OutputModels;
+using static PayAPI.Business.ClientProcesses;
+using static PayAPI.Business.ServiceProcesses;
 
 namespace PayAPI.Controllers
 {
     public class BankController : ApiController
     {
-        // GET api/bank
-       [HttpGet]
-
+        // GET api/get
+        [HttpGet]
         public string Get()
         {
-            return "PayAPI ";
+            return "PayAPI";
         }
 
         [HttpPost]
         public bool AddCard([FromBody] CardInfo info)
         {
-            if (!CredantialsValid(info.CardId, info.CVV, info.CardHolderName) || !CardExist(info.CardId)) return false;
             try
             {
+                if (!AreCredantialsValid(info.CardId, info.CVV, info.CardHolderName) || !CardExist(info.CardId)) return false;
                 var code = GenerateAuthorizationCode(info.CardId); // random 213221
                 SendAuthorizationCode(code, info.CardId); // via pin or email
                 ConnectCardAndDevice(info.CardId, info.DeviceHash); // add device into cards device dict 
@@ -61,11 +63,8 @@ namespace PayAPI.Controllers
 
         }
 
-        [HttpGet]
-        public string GetLogs()
-        {
-            return "Logs";
-        }
+       
+      
 
         [HttpPost]
         public bool AddTransaction([FromBody] NewTransaction info)
@@ -86,34 +85,51 @@ namespace PayAPI.Controllers
         }
 
 
+
         [HttpPost]
         public List<Token> RefreshTokenSet([FromBody] InstanceInfo info)
         {
-            if (CredantialsValid(info.DeviceHash, info.CardId, info.CardholderName)) return new List<Token>();
+//            if (AreCredantialsValid(info.DeviceHash, info.CardId, info.CardholderName)) return new List<Token>();
             return GenerateNewTokensFor(info.DeviceHash);
         }
 
-
-        [HttpPost]
-        public List<Token> DeleteCard([FromBody] InstanceInfo info)
+        private List<Token> GenerateNewTokensFor(string infoDeviceHash)
         {
-            
+            throw new NotImplementedException();
         }
 
 
         [HttpPost]
-        public List<CardInfo> DeleteCard([FromBody] InstanceInfo info)
+        public bool DeleteCard([FromBody] CardInfo info)
         {
-
+            if (!AreCredantialsValid(info.CardId, info.CVV, info.CardHolderName) || !CardExist(info.CardId)) return false;
+            try
+            {
+                DeactivateCard(info.CardId,info.DeviceHash);
+                DeactivateTokens();
+                return true;
+            }
+            catch (Exception e)
+            {
+                LogException(e); // into log 
+                return false;
+            }
         }
 
-        //[HttpPost]
-        //public List<Token> RefreshTokenSet()
-        //{
-        //    return false;
-        //}
+       
 
 
+        [HttpPost]
+        public List<CardValues> GetCards([FromBody] RequestedCards info)
+        {
+            var list  =new List<CardValues>();
+            foreach (var card in info.cards)
+            {
+                if (!CardExist(card.CardId)) return new List<CardValues>();
+                list.Add(new CardValues(){CardId = card.CardId, Value = GetCardValue(card.CardId)});
+            }
+            return list;
+        }
 
     }
 }
