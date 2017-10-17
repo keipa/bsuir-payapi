@@ -13,5 +13,4 @@ namespace PayAPI.InputModels
         public string CardholderName { get; set; }
         public string BankName { get; set; }
     }
-    
 }

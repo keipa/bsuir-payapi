@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Web.Http;
-using Microsoft.ApplicationInsights.Extensibility.Implementation;
 using PayAPI.InputModels;
 using PayAPI.Models;
 using PayAPI.OutputModels;
@@ -27,7 +23,8 @@ namespace PayAPI.Controllers
         {
             try
             {
-                if (!AreCredantialsValid(info.CardId, info.CVV, info.CardHolderName) || !CardExist(info.CardId)) return false;
+                if (!AreCredantialsValid(info.CardId, info.CVV, info.CardHolderName) || !CardExist(info.CardId))
+                    return false;
                 var code = GenerateAuthorizationCode(info.CardId); // random 213221
                 SendAuthorizationCode(code, info.CardId); // via pin or email
                 ConnectCardAndDevice(info.CardId, info.DeviceHash); // add device into cards device dict 
@@ -35,7 +32,7 @@ namespace PayAPI.Controllers
             }
             catch (Exception e)
             {
-                LogException(e);// into log 
+                LogException(e); // into log 
                 return false;
             }
         }
@@ -60,30 +57,27 @@ namespace PayAPI.Controllers
                 LogException(e); // into log 
                 return false;
             }
-
         }
 
-       
-      
 
         [HttpPost]
         public bool AddTransaction([FromBody] NewTransaction info)
         {
             if (!(IsTokenValidAndFresh(info.Token) &&
-                  IsPossibleToTransferMoney(info.Token, info.Destination, info.Amount))) return false; // also rise an exception
+                  IsPossibleToTransferMoney(info.Token, info.Destination, info.Amount)))
+                return false; // also rise an exception
             try
             {
-                ExecuteTransaction(info.Token, info.Destination, info.Amount); 
+                ExecuteTransaction(info.Token, info.Destination, info.Amount);
             }
             catch (Exception e)
             {
                 LogException(e); // into log 
                 return false;
             }
-            
+
             return false;
         }
-
 
 
         [HttpPost]
@@ -102,10 +96,11 @@ namespace PayAPI.Controllers
         [HttpPost]
         public bool DeleteCard([FromBody] CardInfo info)
         {
-            if (!AreCredantialsValid(info.CardId, info.CVV, info.CardHolderName) || !CardExist(info.CardId)) return false;
+            if (!AreCredantialsValid(info.CardId, info.CVV, info.CardHolderName) || !CardExist(info.CardId))
+                return false;
             try
             {
-                DeactivateCard(info.CardId,info.DeviceHash);
+                DeactivateCard(info.CardId, info.DeviceHash);
                 DeactivateTokens();
                 return true;
             }
@@ -116,20 +111,17 @@ namespace PayAPI.Controllers
             }
         }
 
-       
-
 
         [HttpPost]
         public List<CardValues> GetCards([FromBody] RequestedCards info)
         {
-            var list  =new List<CardValues>();
+            var list = new List<CardValues>();
             foreach (var card in info.cards)
             {
                 if (!CardExist(card.CardId)) return new List<CardValues>();
-                list.Add(new CardValues(){CardId = card.CardId, Value = GetCardValue(card.CardId)});
+                list.Add(new CardValues {CardId = card.CardId, Value = GetCardValue(card.CardId)});
             }
             return list;
         }
-
     }
 }

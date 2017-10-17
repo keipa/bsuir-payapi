@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using System.Net.Mail;
 using PayAPI.Models;
@@ -32,15 +30,14 @@ namespace PayAPI.Business
                 }
             }
         }
-        
+
         public static int GenerateAuthorizationCode(string infoCardId)
         {
-            
             using (var db = new BankContext())
             {
                 try
                 {
-                    var code =  new Random().Next(100000,999999);
+                    var code = new Random().Next(100000, 999999);
                     db.Cards.FirstOrDefault(x => x.CardId == infoCardId).AuthorizationCode = code;
                     db.SaveChanges();
                     return code;
@@ -50,25 +47,22 @@ namespace PayAPI.Business
                     LogException(e);
                     throw;
                 }
-                
             }
-            
         }
-        
+
         public static bool CardExist(string infoCardId)
         {
             using (var db = new BankContext())
             {
                 try
                 {
-                    return db.Cards.Any(x => x.CardId ==infoCardId);
+                    return db.Cards.Any(x => x.CardId == infoCardId);
                 }
                 catch (Exception e)
                 {
                     LogException(e);
                     return false;
                 }
-                
             }
         }
 
@@ -79,7 +73,7 @@ namespace PayAPI.Business
                 try
                 {
                     var card = db.Cards.FirstOrDefault(x => x.CardId == infoCardId);
-                    var device = new Device(){DeviceHash = infoDeviceHash, Owner = card.Owner, Name = "Phone"};
+                    var device = new Device {DeviceHash = infoDeviceHash, Owner = card.Owner, Name = "Phone"};
                     card.DevicesConnected.Add(device, false);
                     db.SaveChanges();
                 }
@@ -91,22 +85,21 @@ namespace PayAPI.Business
             }
         }
 
-        public static void SendAuthorizationCodeViaEmail(int code, BankContext db, string infoCardId )
+        public static void SendAuthorizationCodeViaEmail(int code, BankContext db, string infoCardId)
         {
-            
-            var to =  GetEmailByCardId(db, infoCardId);
+            var to = GetEmailByCardId(db, infoCardId);
             var client = new SmtpClient();
             var email = new MailMessage();
             email.Body = code.ToString();
             email.To.Add(to);
             client.Send(email);
-
         }
-        public static void SendAuthorizationCodeViaSMS(int code, BankContext db,string infoCardId )
+
+        public static void SendAuthorizationCodeViaSMS(int code, BankContext db, string infoCardId)
         {
             var phone = GetPhoneByCardId(db, infoCardId);
         }
-            
+
         public static void SendAuthorizationCode(int code, string infoCardId)
         {
             using (var db = new BankContext())
@@ -129,18 +122,19 @@ namespace PayAPI.Business
 
         private static object GetPhoneByCardId(BankContext db, string infoCardId)
         {
-            return db.Cards.FirstOrDefault(x => infoCardId ==x.CardId).Owner.phone;
+            return db.Cards.FirstOrDefault(x => infoCardId == x.CardId).Owner.phone;
         }
 
         private static string GetEmailByCardId(BankContext db, string infoCardId)
         {
-            return db.Cards.FirstOrDefault(x => infoCardId ==x.CardId).Owner.email;
+            return db.Cards.FirstOrDefault(x => infoCardId == x.CardId).Owner.email;
         }
 
         public static void ActivateCard(string infoCardId, int infoDeviceHash)
         {
             throw new NotImplementedException();
         }
+
         public static bool CheckPinExistance(string infoCardId, int infoPin)
         {
             throw new NotImplementedException();
@@ -150,12 +144,12 @@ namespace PayAPI.Business
         {
             throw new NotImplementedException();
         }
-        
+
         public static decimal GetCardValue(string cardCardId)
         {
             throw new NotImplementedException();
         }
-        
+
         public static void DeactivateTokens()
         {
             throw new NotImplementedException();
@@ -165,7 +159,7 @@ namespace PayAPI.Business
         {
             throw new NotImplementedException();
         }
-        
+
         public static void ExecuteTransaction(string infoToken, string infoDestination, decimal infoAmount)
         {
             throw new NotImplementedException();

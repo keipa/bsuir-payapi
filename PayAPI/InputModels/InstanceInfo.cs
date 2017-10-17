@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace PayAPI.InputModels
+﻿namespace PayAPI.InputModels
 {
     public class InstanceInfo
     {
@@ -12,6 +7,5 @@ namespace PayAPI.InputModels
         public string CardholderName { get; set; }
 
         public string DeviceHash { get; set; }
-
     }
 }

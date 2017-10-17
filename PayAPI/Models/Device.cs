@@ -17,6 +17,5 @@ namespace PayAPI.Models
         public int WrongInputCount { get; set; }
 
         public DateTime BannedUntil { get; set; }
-
     }
 }

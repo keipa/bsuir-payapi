@@ -28,9 +28,5 @@ namespace PayAPI.Business
         {
             throw new NotImplementedException();
         }
-
-       
-
-        
     }
 }

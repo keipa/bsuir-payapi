@@ -16,6 +16,5 @@ namespace PayAPI.Models
         public Card to { get; set; }
 
         public decimal amount { get; set; }
-
     }
 }

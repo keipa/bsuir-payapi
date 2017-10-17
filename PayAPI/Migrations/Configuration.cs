@@ -1,18 +1,16 @@
+using System.Data.Entity.Migrations;
+using PayAPI.Models;
+
 namespace PayAPI.Migrations
 {
-    using System;
-    using System.Data.Entity;
-    using System.Data.Entity.Migrations;
-    using System.Linq;
-
-    internal sealed class Configuration : DbMigrationsConfiguration<PayAPI.Models.BankContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<BankContext>
     {
         public Configuration()
         {
             AutomaticMigrationsEnabled = false;
         }
 
-        protected override void Seed(PayAPI.Models.BankContext context)
+        protected override void Seed(BankContext context)
         {
             //  This method will be called after migrating to the latest version.
 
