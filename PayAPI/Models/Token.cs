@@ -10,7 +10,9 @@ namespace PayAPI.Models
 
         public Guid Value { get; set; }
         public DateTime ExpiredDate { get; set; }
-        public Device Owner { get; set; }
+        public Device RelatedDevice { get; set; }
+        public Card RelatedCard { get; set; }
+
         public bool Used { get; set; }
     }
 }

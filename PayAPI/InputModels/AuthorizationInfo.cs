@@ -4,6 +4,6 @@
     {
         public string CardId { get; set; }
         public int PIN { get; set; }
-        public int DeviceHash { get; set; }
+        public string DeviceHash { get; set; }
     }
 }

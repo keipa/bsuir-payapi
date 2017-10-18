@@ -208,6 +208,10 @@
     <Compile Include="Migrations\201710161818134_logs.Designer.cs">
       <DependentUpon>201710161818134_logs.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201710181649183_tokens_owner.cs" />
+    <Compile Include="Migrations\201710181649183_tokens_owner.Designer.cs">
+      <DependentUpon>201710181649183_tokens_owner.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Bank.cs" />
     <Compile Include="Contexts\BankContext.cs" />
@@ -300,6 +304,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201710161818134_logs.resx">
       <DependentUpon>201710161818134_logs.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201710181649183_tokens_owner.resx">
+      <DependentUpon>201710181649183_tokens_owner.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

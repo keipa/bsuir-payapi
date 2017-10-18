@@ -64,7 +64,7 @@ namespace PayAPI.Controllers
         public bool AddTransaction([FromBody] NewTransaction info)
         {
             if (!(IsTokenValidAndFresh(info.Token) &&
-                  IsPossibleToTransferMoney(info.Token, info.Destination, info.Amount)))
+                  IsPossibleToTransferMoney(info.Token, info.Amount)))
                 return false; // also rise an exception
             try
             {
@@ -83,14 +83,10 @@ namespace PayAPI.Controllers
         [HttpPost]
         public List<Token> RefreshTokenSet([FromBody] InstanceInfo info)
         {
-//            if (AreCredantialsValid(info.DeviceHash, info.CardId, info.CardholderName)) return new List<Token>();
-            return GenerateNewTokensFor(info.DeviceHash);
+            return GenerateNewTokensFor(info.DeviceHash, info.CardId);
         }
 
-        private List<Token> GenerateNewTokensFor(string infoDeviceHash)
-        {
-            throw new NotImplementedException();
-        }
+       
 
 
         [HttpPost]
@@ -101,7 +97,7 @@ namespace PayAPI.Controllers
             try
             {
                 DeactivateCard(info.CardId, info.DeviceHash);
-                DeactivateTokens();
+                DeactivateTokens(info.DeviceHash);
                 return true;
             }
             catch (Exception e)
