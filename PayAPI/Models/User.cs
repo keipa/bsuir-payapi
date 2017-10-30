@@ -12,7 +12,6 @@ namespace PayAPI.Models
         public string phone { get; set; }
 
         public string Name { get; set; }
-        public List<Card> UserCards { get; set; }
-        public List<Device> OwnedDevices { get; set; }
+
     }
 }

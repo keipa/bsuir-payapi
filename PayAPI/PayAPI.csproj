@@ -212,6 +212,10 @@
     <Compile Include="Migrations\201710181649183_tokens_owner.Designer.cs">
       <DependentUpon>201710181649183_tokens_owner.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201710301020550_remove_redundant_fields.cs" />
+    <Compile Include="Migrations\201710301020550_remove_redundant_fields.Designer.cs">
+      <DependentUpon>201710301020550_remove_redundant_fields.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Bank.cs" />
     <Compile Include="Contexts\BankContext.cs" />
@@ -307,6 +311,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201710181649183_tokens_owner.resx">
       <DependentUpon>201710181649183_tokens_owner.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201710301020550_remove_redundant_fields.resx">
+      <DependentUpon>201710301020550_remove_redundant_fields.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

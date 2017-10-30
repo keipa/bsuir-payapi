@@ -77,9 +77,13 @@ namespace PayAPI.Business
                 try
                 {
                     var card = GetCardById(infoCardId,db);
-                    var device = new Device { DeviceHash = infoDeviceHash, Owner = card.Owner, Name = "Phone" };
+                    var device =  CreateDeviceIfNotExist(db, infoDeviceHash, card.Owner);
                     bool isAuthorized = false;
-                    card.DevicesConnected.Add(device, isAuthorized);
+                    if (card.DevicesConnected.Keys.Any(x => x == device)) card.DevicesConnected[device] = isAuthorized;
+                    else
+                    {
+                        card.DevicesConnected.Add(device, isAuthorized);
+                    }
                     db.SaveChanges();
                 }
                 catch (Exception e)
@@ -88,6 +92,15 @@ namespace PayAPI.Business
                     throw;
                 }
             }
+        }
+
+        private static Device CreateDeviceIfNotExist(BankContext db,string infoDeviceHash, User owner)
+        {
+            if (db.Devices.Any(x => x.DeviceHash == infoDeviceHash))
+                return db.Devices.FirstOrDefault(x => x.DeviceHash == infoDeviceHash);
+            var device = new Device {DeviceHash = infoDeviceHash, Owner = owner,  Name = "Phone"};
+            db.Devices.Add(device);
+            return device;
         }
 
         public static void SendAuthorizationCodeViaEmail(int code, BankContext db, string infoCardId)

@@ -2,6 +2,7 @@
 {
     public class CardInfo
     {
+        
         public string CardId { get; set; }
         public int CVV { get; set; }
         public string CardHolderName { get; set; }
