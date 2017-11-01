@@ -6,7 +6,7 @@ namespace PayAPI.Controllers
     {
         public ActionResult Index()
         {
-            ViewBag.Title = "Home Page";
+            ViewBag.Title = "PayAPI";
 
             return View();
         }
