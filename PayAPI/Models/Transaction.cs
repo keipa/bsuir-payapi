@@ -10,10 +10,10 @@ namespace PayAPI.Models
 
         public DateTime Requseted { get; set; }
         public DateTime Executed { get; set; }
-        public Device UseDevice { get; set; }
-        public Card from { get; set; }
+        public virtual Device UseDevice { get; set; }
+        public virtual Card from { get; set; }
 
-        public Card to { get; set; }
+        public virtual Card to { get; set; }
 
         public decimal amount { get; set; }
     }

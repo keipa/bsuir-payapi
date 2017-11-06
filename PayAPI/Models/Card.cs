@@ -8,11 +8,9 @@ namespace PayAPI.Models
         [Key]
         public int Id { get; set; }
 
-        public User Owner { get; set; }
+        public virtual User Owner { get; set; }
         public string CardId { get; set; }
         public int CVV { get; set; }
-
-        public Dictionary<Device, bool> DevicesConnected { get; set; } // authorized devices(device/isactivated)
 
         public decimal Balance { get; set; }
 

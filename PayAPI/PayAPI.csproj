@@ -217,7 +217,24 @@
     <Compile Include="Migrations\201710301020550_remove_redundant_fields.Designer.cs">
       <DependentUpon>201710301020550_remove_redundant_fields.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201711061222521_virtual statement.cs" />
+    <Compile Include="Migrations\201711061222521_virtual statement.Designer.cs">
+      <DependentUpon>201711061222521_virtual statement.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201711061238430_virtual_dict.cs" />
+    <Compile Include="Migrations\201711061238430_virtual_dict.Designer.cs">
+      <DependentUpon>201711061238430_virtual_dict.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201711061308485_activationTable.cs" />
+    <Compile Include="Migrations\201711061308485_activationTable.Designer.cs">
+      <DependentUpon>201711061308485_activationTable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201711061321159_complete_activation.cs" />
+    <Compile Include="Migrations\201711061321159_complete_activation.Designer.cs">
+      <DependentUpon>201711061321159_complete_activation.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\Activation.cs" />
     <Compile Include="Models\Bank.cs" />
     <Compile Include="Contexts\BankContext.cs" />
     <Compile Include="Models\Card.cs" />
@@ -315,6 +332,18 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201710301020550_remove_redundant_fields.resx">
       <DependentUpon>201710301020550_remove_redundant_fields.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201711061222521_virtual statement.resx">
+      <DependentUpon>201711061222521_virtual statement.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201711061238430_virtual_dict.resx">
+      <DependentUpon>201711061238430_virtual_dict.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201711061308485_activationTable.resx">
+      <DependentUpon>201711061308485_activationTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201711061321159_complete_activation.resx">
+      <DependentUpon>201711061321159_complete_activation.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
