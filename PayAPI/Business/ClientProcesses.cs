@@ -256,7 +256,7 @@ namespace PayAPI.Business
             throw new NotImplementedException();
         }
 
-        public static List<Token> GenerateNewTokensFor(string infoDeviceHash, string cardid)
+        public static List<Guid> GenerateNewTokensFor(string infoDeviceHash, string cardid)
         {
             using (var db = new BankContext())
             {
@@ -268,18 +268,18 @@ namespace PayAPI.Business
                     var device = GetDeviceById(infoDeviceHash, db);
                     for (int i = 0; i < TokenSetCount; i++)
                     {
-                        var newToken = new Token { Value = new Guid(), Used = false, RelatedCard = card, ExpiredDate = DateTime.Now + TimeSpan.FromMinutes(ExpireAfterMinutes), RelatedDevice = device };
+                        var newToken = new Token { Value = Guid.NewGuid(), Used = false, RelatedCard = card, ExpiredDate = DateTime.Now + TimeSpan.FromMinutes(ExpireAfterMinutes), RelatedDevice = device };
                         tokens.Add(newToken);
                         db.Tokens.Add(newToken);
                     }
                     db.SaveChanges();
-                    return tokens;
+                    return tokens.Select(x => x.Value).ToList();
 
                 }
                 catch (Exception e)
                 {
                     LogException(e);
-                    return new List<Token>();
+                    return new List<Guid>();
                 }
             }
         }
@@ -298,7 +298,11 @@ namespace PayAPI.Business
         private static void MakeTokensNotValid(string infoDeviceHash, BankContext db)
         {
             var device = GetDeviceById(infoDeviceHash, db);
-            var tokens = db.Tokens.Where(x => x.RelatedDevice == device);
+            var tokens = db.Tokens.Where(x => x.RelatedDevice.DeviceHash == device.DeviceHash);
+            if (tokens is null || !tokens.Any() )
+            {
+                return;
+            }
             foreach (var token in tokens)
             {
                 token.Used = true;
@@ -307,8 +311,44 @@ namespace PayAPI.Business
 
         public static void ExecuteTransaction(string infoToken, string infoDestination, decimal infoAmount)
         {
-            throw new NotImplementedException();
+            using (var db = new BankContext())
+            {
+                var fromCard = GetCardByToken(db, infoToken);
+                var toCard = GetCardById(infoDestination, db);
+                decimal fromAmount = fromCard.Balance;
+                decimal toAmount = toCard.Balance;
+                try
+                {
+                    UseToken(db, infoToken);
+                    fromCard.Balance -= infoAmount;
+                    toCard.Balance += infoAmount;
+                    db.SaveChanges();
+                }
+                catch (Exception e)
+                {
+                    fromCard.Balance = fromAmount;
+                    toCard.Balance = toAmount;
+                    db.SaveChanges();
+                    throw;
+                }
+                
+
+            }
+
         }
+
+        private static void UseToken(BankContext db, string infoToken)
+        {
+            bool isUsed = true;
+            db.Tokens.FirstOrDefault(x => x.Value.ToString() == infoToken).Used = isUsed;
+
+        }
+
+
+        private static Card GetCardByToken(BankContext db, string infotoken)
+        {
+            return db.Tokens.FirstOrDefault(x => x.Value.ToString() == infotoken).RelatedCard;
+        } 
 
         public static bool IsPossibleToTransferMoney(string infoToken, decimal infoAmount)
         {
