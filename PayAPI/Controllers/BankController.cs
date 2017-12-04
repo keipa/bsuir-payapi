@@ -59,6 +59,14 @@ namespace PayAPI.Controllers
             }
         }
 
+        [HttpPost]
+        public List<Guid> RefreshTokenSet([FromBody] InstanceInfo info)
+        {
+            //if(CardActive())
+            return GenerateNewTokensFor(info.DeviceHash, info.CardId);
+        }
+
+
 
         [HttpPost]
         public bool AddTransaction([FromBody] NewTransaction info)
@@ -75,18 +83,22 @@ namespace PayAPI.Controllers
                 LogException(e); // into log 
                 return false;
             }
-
-            return false;
+            return true;
         }
+
 
 
         [HttpPost]
-        public List<Token> RefreshTokenSet([FromBody] InstanceInfo info)
+        public List<CardValues> GetCards([FromBody] RequestedCards info)
         {
-            return GenerateNewTokensFor(info.DeviceHash, info.CardId);
+            var list = new List<CardValues>();
+            foreach (var card in info.cards)
+            {
+                if (!CardExist(card.CardId)) return new List<CardValues>();
+                list.Add(new CardValues { CardId = card.CardId, Value = GetCardValue(card.CardId) });
+            }
+            return list;
         }
-
-       
 
 
         [HttpPost]
@@ -108,16 +120,6 @@ namespace PayAPI.Controllers
         }
 
 
-        [HttpPost]
-        public List<CardValues> GetCards([FromBody] RequestedCards info)
-        {
-            var list = new List<CardValues>();
-            foreach (var card in info.cards)
-            {
-                if (!CardExist(card.CardId)) return new List<CardValues>();
-                list.Add(new CardValues {CardId = card.CardId, Value = GetCardValue(card.CardId)});
-            }
-            return list;
-        }
+      
     }
 }

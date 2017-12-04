@@ -24,7 +24,7 @@ namespace PayAPI.Business
             {
                 try
                 {
-                    var card = GetCardById(infoCardId,db);
+                    var card = GetCardById(infoCardId, db);
                     return card.CVV == infoCvv && card.Owner.Name == infoCardHolderName;
                 }
                 catch (Exception e)
@@ -76,13 +76,15 @@ namespace PayAPI.Business
             {
                 try
                 {
-                    var card = GetCardById(infoCardId,db);
-                    var device =  CreateDeviceIfNotExist(db, infoDeviceHash, card.Owner);
-                    bool isAuthorized = false;
-                    if (card.DevicesConnected.Keys.Any(x => x == device)) card.DevicesConnected[device] = isAuthorized;
+                    var card = GetCardById(infoCardId, db);
+                    var device = CreateDeviceIfNotExist(db, infoDeviceHash, card.Owner);
+                    if (AreAnyDevicesConnected(db, card, device))
+                    {
+                        db.Activations.FirstOrDefault(x => x.Card == card && x.Device == device).isActive = false;
+                    }
                     else
                     {
-                        card.DevicesConnected.Add(device, isAuthorized);
+                        db.Activations.Add(new Activation { Card = card, Device = device, isActive = false });
                     }
                     db.SaveChanges();
                 }
@@ -94,11 +96,16 @@ namespace PayAPI.Business
             }
         }
 
-        private static Device CreateDeviceIfNotExist(BankContext db,string infoDeviceHash, User owner)
+        private static bool AreAnyDevicesConnected(BankContext db, Card card, Device device)
+        {
+            return db.Activations.Any(x => x.Card.CardId == card.CardId && x.Device.DeviceHash == device.DeviceHash);
+        }
+
+        private static Device CreateDeviceIfNotExist(BankContext db, string infoDeviceHash, User owner)
         {
             if (db.Devices.Any(x => x.DeviceHash == infoDeviceHash))
                 return db.Devices.FirstOrDefault(x => x.DeviceHash == infoDeviceHash);
-            var device = new Device {DeviceHash = infoDeviceHash, Owner = owner,  Name = "Phone"};
+            var device = new Device { DeviceHash = infoDeviceHash, Owner = owner, Name = "Phone", BannedUntil = DateTime.Now };
             db.Devices.Add(device);
             return device;
         }
@@ -155,14 +162,21 @@ namespace PayAPI.Business
                 try
                 {
                     var card = db.Cards.FirstOrDefault(x => x.CardId == infoCardId);
-                    var devices = card.DevicesConnected;
                     var currentDevice = db.Devices.FirstOrDefault(x => x.DeviceHash == infoDeviceHash);
-                    devices[currentDevice] = true;
+                    var activation = db.Activations.FirstOrDefault(x =>
+                        x.Card.CardId == card.CardId && x.Device.DeviceHash == currentDevice.DeviceHash);
+                    if (activation != null) activation.isActive = true;
+                    else
+                    {
+                        throw new Exception("activation is null");
+                        
+                    }
                     db.SaveChanges();
                 }
                 catch (Exception e)
                 {
                     LogException(e);
+                    throw;
                 }
             }
         }
@@ -242,7 +256,7 @@ namespace PayAPI.Business
             throw new NotImplementedException();
         }
 
-        public static List<Token> GenerateNewTokensFor(string infoDeviceHash, string cardid)
+        public static List<Guid> GenerateNewTokensFor(string infoDeviceHash, string cardid)
         {
             using (var db = new BankContext())
             {
@@ -254,18 +268,18 @@ namespace PayAPI.Business
                     var device = GetDeviceById(infoDeviceHash, db);
                     for (int i = 0; i < TokenSetCount; i++)
                     {
-                        var newToken = new Token { Value = new Guid(), Used = false, RelatedCard = card, ExpiredDate = DateTime.Now + TimeSpan.FromMinutes(ExpireAfterMinutes), RelatedDevice = device};
+                        var newToken = new Token { Value = Guid.NewGuid(), Used = false, RelatedCard = card, ExpiredDate = DateTime.Now + TimeSpan.FromMinutes(ExpireAfterMinutes), RelatedDevice = device };
                         tokens.Add(newToken);
                         db.Tokens.Add(newToken);
                     }
                     db.SaveChanges();
-                    return tokens;
+                    return tokens.Select(x => x.Value).ToList();
 
                 }
                 catch (Exception e)
                 {
                     LogException(e);
-                    return new List<Token>();
+                    return new List<Guid>();
                 }
             }
         }
@@ -283,8 +297,12 @@ namespace PayAPI.Business
 
         private static void MakeTokensNotValid(string infoDeviceHash, BankContext db)
         {
-            var device = GetDeviceById(infoDeviceHash,db);
-            var tokens = db.Tokens.Where(x => x.RelatedDevice == device);
+            var device = GetDeviceById(infoDeviceHash, db);
+            var tokens = db.Tokens.Where(x => x.RelatedDevice.DeviceHash == device.DeviceHash);
+            if (tokens is null || !tokens.Any() )
+            {
+                return;
+            }
             foreach (var token in tokens)
             {
                 token.Used = true;
@@ -293,8 +311,44 @@ namespace PayAPI.Business
 
         public static void ExecuteTransaction(string infoToken, string infoDestination, decimal infoAmount)
         {
-            throw new NotImplementedException();
+            using (var db = new BankContext())
+            {
+                var fromCard = GetCardByToken(db, infoToken);
+                var toCard = GetCardById(infoDestination, db);
+                decimal fromAmount = fromCard.Balance;
+                decimal toAmount = toCard.Balance;
+                try
+                {
+                    UseToken(db, infoToken);
+                    fromCard.Balance -= infoAmount;
+                    toCard.Balance += infoAmount;
+                    db.SaveChanges();
+                }
+                catch (Exception e)
+                {
+                    fromCard.Balance = fromAmount;
+                    toCard.Balance = toAmount;
+                    db.SaveChanges();
+                    throw;
+                }
+                
+
+            }
+
         }
+
+        private static void UseToken(BankContext db, string infoToken)
+        {
+            bool isUsed = true;
+            db.Tokens.FirstOrDefault(x => x.Value.ToString() == infoToken).Used = isUsed;
+
+        }
+
+
+        private static Card GetCardByToken(BankContext db, string infotoken)
+        {
+            return db.Tokens.FirstOrDefault(x => x.Value.ToString() == infotoken).RelatedCard;
+        } 
 
         public static bool IsPossibleToTransferMoney(string infoToken, decimal infoAmount)
         {

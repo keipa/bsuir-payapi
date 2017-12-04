@@ -19,23 +19,49 @@ namespace PayAPI.Controllers
             }
         }
 
-
         [HttpGet]
-        public List<string> Users()
+        public IEnumerable<User> Users()
         {
             using (var db = new BankContext())
             {
-                var users = db.Users.ToList();
-                var cards = db.Cards.ToList();
-                var devices = db.Devices.ToList();
-                return users.Select(usr => $"{usr.Id};" +
-                                           $"[{usr.Name}];" +
-                                           $"{usr.email};" +
-                                           "Cards:" + (cards.All(x => x.Owner != usr) ? "no cards; " : string.Join(", ", cards.Where(x => x.Owner == usr).Select(x => x.CardId ?? string.Empty).ToList())) + ":" +
-                                           "Devices:" + (devices.All(x => x.Owner != usr) ? "no devices;" : string.Join(", ", devices.Where(x => x.Owner == usr).Select(x => x.DeviceHash ?? string.Empty).ToList()))).ToList();
+                return db.Users.ToList();
             }
         }
 
+        [HttpGet]
+        public IEnumerable<Card> Cards()
+        {
+            using (var db = new BankContext())
+            {
+                return db.Cards.ToList();
+            }
+        }
+
+      
+
+
+
+        [HttpGet]
+        public IEnumerable<Device> Devices()
+        {
+            using (var db = new BankContext())
+            {
+                return db.Devices.ToList();
+            }
+        }
+
+        [HttpPost]
+        public void DeleteUser(User user)
+        {
+
+            using (var db = new BankContext())
+            {
+                if (db.Users.Any(x => x.Name != user.Name)) return;
+                var dbuser = db.Users.FirstOrDefault(x => x.Name != user.Name);
+                db.Users.Remove(dbuser);
+                db.SaveChanges();
+            }
+        }
 
 
         //header
@@ -59,6 +85,21 @@ namespace PayAPI.Controllers
             }
         }
 
+        //do not use in prod)
+        [HttpPost]
+        public void AddDevice(Device device)
+        {
+
+            using (var db = new BankContext())
+            {
+                var owner = db.Users.FirstOrDefault(x => x.Name == device.Owner.Name);
+                if (db.Devices.Any(x => x.Name == device.Name || x.Owner == owner)) return;
+                db.Devices.Add(new Device {Owner = owner, DeviceHash = "SERVICE", Name = "PHONE", });
+                db.SaveChanges();
+            }
+        }
+
+
 
         //header
         //Content-Type:
@@ -72,24 +113,24 @@ namespace PayAPI.Controllers
         //    }
         //}
 
-        [HttpPost]
+    [HttpPost]
         public void AddCard(Card card)
         {
             using (var db = new BankContext())
             {
                 if (db.Cards.Any(x => x.CardId == card.CardId)) return;
-                var owner = db.Users.FirstOrDefault(x => x.Name == card.Owner.Name);
                 var new_card = new Card
                 {
                     CardId = card.CardId,
                     Balance = card.Balance,
                     CVV = card.CVV,
-                    Owner = owner,
+                    Owner = db.Users.FirstOrDefault(x => x.Name == card.Owner.Name),
                     connected = false
                 };
                 db.Cards.Add(new_card);
 
                 db.SaveChanges();
+
             }
         }
 
