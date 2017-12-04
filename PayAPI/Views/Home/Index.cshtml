@@ -1,6 +1,16 @@
 ﻿<div class="jumbotron">
     <h1>Бесконтактные платежи</h1>
     <span class="label label-primary">Банковский модуль в работе</span>
+    <br>
+    @if (ViewBag.Connected)
+    {
+        <span class="label label-success">SQL Server Connected</span>
+    }
+    else
+    { 
+    <span class="label label-danger">Database Connection Error</span>
+    }
+    
 </div>
 <div class="row">
     <div class="col-md-4">

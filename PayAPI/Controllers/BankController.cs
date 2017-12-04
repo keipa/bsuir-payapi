@@ -6,6 +6,7 @@ using PayAPI.Models;
 using PayAPI.OutputModels;
 using static PayAPI.Business.ClientProcesses;
 using static PayAPI.Business.ServiceProcesses;
+using System.Linq;
 
 namespace PayAPI.Controllers
 {
@@ -66,7 +67,11 @@ namespace PayAPI.Controllers
             return GenerateNewTokensFor(info.DeviceHash, info.CardId);
         }
 
-
+        [HttpPost]
+        public Dictionary<string, List<Guid>> RefreshTokens([FromBody]  string device)
+        {
+            return GenerateNewTokensFor(device);
+        }
 
         [HttpPost]
         public bool AddTransaction([FromBody] NewTransaction info)
@@ -88,16 +93,20 @@ namespace PayAPI.Controllers
 
 
 
-        [HttpPost]
-        public List<CardValues> GetCards([FromBody] RequestedCards info)
+        [HttpGet]
+        public List<CardValues> GetCards([FromUri] string deviceHash)
         {
-            var list = new List<CardValues>();
-            foreach (var card in info.cards)
+            using (var db = new BankContext())
             {
-                if (!CardExist(card.CardId)) return new List<CardValues>();
-                list.Add(new CardValues { CardId = card.CardId, Value = GetCardValue(card.CardId) });
+                var list = new List<CardValues>();
+                var cards = db.Activations.Where(x => x.Device.DeviceHash == deviceHash).Select(x => x.Card);
+                foreach (var card in cards)
+                {
+                    if (!CardExist(card.CardId)) return new List<CardValues>();
+                    list.Add(new CardValues { CardId = card.CardId, Value = GetCardValue(card.CardId) });
+                }
+                return list;
             }
-            return list;
         }
 
 

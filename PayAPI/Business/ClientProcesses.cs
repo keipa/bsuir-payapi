@@ -283,6 +283,41 @@ namespace PayAPI.Business
                 }
             }
         }
+        public static Dictionary<string, List<Guid>> GenerateNewTokensFor(string infoDeviceHash)
+        {
+            using (var db = new BankContext())
+            {
+                var tokenDict = new Dictionary<string, List<Guid>>();
+                var cards = db.Activations.Where(x => x.Device.DeviceHash == infoDeviceHash).Select(x => x.Card).ToList();
+                foreach (var card in cards)
+                {
+
+                    try
+                    {
+                        var tokens = new List<Token>();
+                        MakeTokensNotValid(infoDeviceHash, db);
+                        var device = GetDeviceById(infoDeviceHash, db);
+                        for (int i = 0; i < TokenSetCount; i++)
+                        {
+                            var newToken = new Token { Value = Guid.NewGuid(), Used = false, RelatedCard = card, ExpiredDate = DateTime.Now + TimeSpan.FromMinutes(ExpireAfterMinutes), RelatedDevice = device };
+                            tokens.Add(newToken);
+                            db.Tokens.Add(newToken);
+                        }
+                        db.SaveChanges();
+                        
+                        tokenDict.Add(card.CardId,tokens.Select(x => x.Value).ToList());
+
+                    }
+                    catch (Exception e)
+                    {
+                        LogException(e);
+                        return tokenDict;
+                    }
+                }
+                return tokenDict;
+            }
+
+        }
 
         private static Card GetCardById(string cardid, BankContext db)
         {
@@ -297,7 +332,7 @@ namespace PayAPI.Business
 
         private static void MakeTokensNotValid(string infoDeviceHash, BankContext db)
         {
-            var device = GetDeviceById(infoDeviceHash, db);
+            var device = db.Devices.FirstOrDefault(x => x.DeviceHash == infoDeviceHash);
             var tokens = db.Tokens.Where(x => x.RelatedDevice.DeviceHash == device.DeviceHash);
             if (tokens is null || !tokens.Any() )
             {
@@ -307,6 +342,7 @@ namespace PayAPI.Business
             {
                 token.Used = true;
             }
+            db.SaveChanges();
         }
 
         public static void ExecuteTransaction(string infoToken, string infoDestination, decimal infoAmount)
