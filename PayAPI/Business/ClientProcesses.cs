@@ -345,25 +345,21 @@ namespace PayAPI.Business
             db.SaveChanges();
         }
 
-        public static void ExecuteTransaction(string infoToken, string infoDestination, decimal infoAmount)
+        public static void ExecuteTransaction(string infoToken,  decimal infoAmount)
         {
             using (var db = new BankContext())
             {
                 var fromCard = GetCardByToken(db, infoToken);
-                var toCard = GetCardById(infoDestination, db);
                 decimal fromAmount = fromCard.Balance;
-                decimal toAmount = toCard.Balance;
                 try
                 {
                     UseToken(db, infoToken);
                     fromCard.Balance -= infoAmount;
-                    toCard.Balance += infoAmount;
                     db.SaveChanges();
                 }
                 catch (Exception e)
                 {
                     fromCard.Balance = fromAmount;
-                    toCard.Balance = toAmount;
                     db.SaveChanges();
                     throw;
                 }

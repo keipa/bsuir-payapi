@@ -81,7 +81,7 @@ namespace PayAPI.Controllers
                 return false; // also rise an exception
             try
             {
-                ExecuteTransaction(info.Token, info.Destination, info.Amount);
+                ExecuteTransaction(info.Token,  info.Amount);
             }
             catch (Exception e)
             {
