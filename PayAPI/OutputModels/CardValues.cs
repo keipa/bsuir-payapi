@@ -4,5 +4,9 @@
     {
         public string CardId { get; set; }
         public decimal Value { get; set; }
+
+        public string CardHolderName { get; set; }
+
+
     }
 }

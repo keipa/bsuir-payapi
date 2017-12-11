@@ -67,6 +67,7 @@ namespace PayAPI.Controllers
         {
             IsTokenValidAndFresh(info.Token);
             IsPossibleToTransferMoney(info.Token, info.Amount);
+            IsCardActive(info.Token);
             try
             {
                 ExecuteTransaction(info.Token, info.Amount);
@@ -87,11 +88,11 @@ namespace PayAPI.Controllers
             using (var db = new BankContext())
             {
                 var list = new List<CardValues>();
-                var cards = db.Activations.Where(x => x.Device.DeviceHash == deviceHash).Select(x => x.Card);
+                var cards = db.Activations.Where(x => x.Device.DeviceHash == deviceHash && x.isActive ).Select(x => x.Card);
                 if (!cards.Any()) return new List<CardValues>();
                 foreach (var card in cards)
                 {
-                    list.Add(new CardValues { CardId = card.CardId, Value = GetCardValue(card.CardId) });
+                    list.Add(new CardValues { CardId = card.CardId, Value = GetCardValue(card.CardId), CardHolderName = card.Owner.Name});
                 }
                 return list;
             }
@@ -102,7 +103,7 @@ namespace PayAPI.Controllers
         public bool DeleteCard([FromBody] CardInfo info)
         {
             if (!AreCredantialsValid(info.CardId, info.CVV, info.CardHolderName) || !CardExist(info.CardId))
-                return false;
+                throw new HttpException(500, "Credantials error");
             try
             {
                 DeactivateCard(info.CardId, info.DeviceHash);
@@ -112,7 +113,7 @@ namespace PayAPI.Controllers
             catch (Exception e)
             {
                 LogException(e); // into log 
-                return false;
+                throw new HttpException(500, "Transatction execution error");
             }
         }
 

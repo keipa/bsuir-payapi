@@ -77,7 +77,7 @@ namespace PayAPI.Business
             {
                 var card = GetCardById(infoCardId, db);
                 var device = CreateDeviceIfNotExist(db, infoDeviceHash, card.Owner);
-                if (db.Activations.Any(x => x.Card == card && x.Device == device)) throw new HttpException(500, "Card already connected");
+                if (db.Activations.Any(x => x.Card.CardId == card.CardId && x.Device.DeviceHash == device.DeviceHash && !x.isActive)) throw new HttpException(500, "Card already connected");
 
             }
 
@@ -120,6 +120,7 @@ namespace PayAPI.Business
                 return db.Devices.FirstOrDefault(x => x.DeviceHash == infoDeviceHash);
             var device = new Device { DeviceHash = infoDeviceHash, Owner = owner, Name = "Phone", BannedUntil = DateTime.Now };
             db.Devices.Add(device);
+            db.SaveChanges();
             return device;
         }
 
@@ -261,7 +262,12 @@ namespace PayAPI.Business
 
         public static void DeactivateCard(string infoCardId, string infoDeviceHash)
         {
-            throw new NotImplementedException();
+            using (var db = new BankContext())
+            {
+                db.Activations.Remove(db.Activations.FirstOrDefault(x =>
+                    x.Device.DeviceHash == infoDeviceHash && x.Card.CardId == infoCardId));
+                db.SaveChanges();
+            }
         }
 
         public static List<Guid> GenerateNewTokensFor(string infoDeviceHash, string cardid)
@@ -388,28 +394,49 @@ namespace PayAPI.Business
         private static Card GetCardByToken(BankContext db, string infotoken)
         {
             return db.Tokens.FirstOrDefault(x => x.Value.ToString() == infotoken).RelatedCard;
-        } 
+        }
 
-        public static bool IsPossibleToTransferMoney(string infoToken, decimal infoAmount)
+        public static void IsCardActive(string infoToken)
+        {
+            using (var db = new BankContext())
+            {
+                try
+                {
+                    var isActive = db.Activations.FirstOrDefault(y =>
+                        y.Card.CardId == db.Tokens.FirstOrDefault(x => x.Value.ToString() == infoToken).RelatedCard
+                            .CardId).isActive;
+                    if (!isActive) throw new HttpException(500, "Card Is not Active");
+                }
+                catch (Exception e)
+                {
+                    LogException(e);
+                    throw new HttpException(500, "cannot check card status");
+
+                }
+            }
+        }
+
+
+        public static void IsPossibleToTransferMoney(string infoToken, decimal infoAmount)
         {
             using (var db = new BankContext())
             {
                 try
                 {
                     var fromCard = db.Tokens.FirstOrDefault(x => x.Value.ToString() == infoToken).RelatedCard;
-                    return fromCard.Balance >= infoAmount;
+                    if (fromCard.Balance < infoAmount) throw new HttpException(500, "Host has not enough money");
                 }
                 catch (Exception e)
                 {
                     LogException(e);
-                    throw new HttpException(500, "Host has not enough money");
+                    throw new HttpException(500, "token is not connected with card");
 
                 }
             }
 
         }
 
-        public static bool IsTokenValidAndFresh(string infoToken)
+        public static void IsTokenValidAndFresh(string infoToken)
         {
             using (var db = new BankContext())
             {
@@ -419,7 +446,7 @@ namespace PayAPI.Business
                     bool exist = db.Tokens.Any(x => x.Value.ToString() == infoToken);
                     bool notUsed = !token.Used;
                     bool fresh = token.ExpiredDate <= DateTime.Now;
-                    return notUsed && fresh && exist;
+                    if (!(notUsed && fresh && exist)) throw new HttpException(500, "Token Is not valid or expired or already used");
                 }
                 catch (Exception e)
                 {
