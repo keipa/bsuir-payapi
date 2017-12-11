@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Net.Mail;
+using System.Web;
 using PayAPI.Models;
 using static PayAPI.Business.ServiceProcesses;
 
@@ -30,7 +31,7 @@ namespace PayAPI.Business
                 catch (Exception e)
                 {
                     LogException(e);
-                    return false;
+                    throw new HttpException(500, "Credentials are invalid");
                 }
             }
         }
@@ -49,7 +50,7 @@ namespace PayAPI.Business
                 catch (Exception e)
                 {
                     LogException(e);
-                    throw;
+                    throw new HttpException(500, "Authorization code generation error");
                 }
             }
         }
@@ -65,7 +66,8 @@ namespace PayAPI.Business
                 catch (Exception e)
                 {
                     LogException(e);
-                    return false;
+                    throw new HttpException(500, "Card is not exist");
+
                 }
             }
         }
@@ -91,7 +93,7 @@ namespace PayAPI.Business
                 catch (Exception e)
                 {
                     LogException(e);
-                    throw;
+                    throw new HttpException(500, "Connection Card And Device error");
                 }
             }
         }
@@ -140,7 +142,7 @@ namespace PayAPI.Business
                 catch (Exception e)
                 {
                     LogException(e);
-                    throw;
+                    throw new HttpException(500, "Send AuthorizationCode error");
                 }
             }
         }
@@ -165,18 +167,13 @@ namespace PayAPI.Business
                     var currentDevice = db.Devices.FirstOrDefault(x => x.DeviceHash == infoDeviceHash);
                     var activation = db.Activations.FirstOrDefault(x =>
                         x.Card.CardId == card.CardId && x.Device.DeviceHash == currentDevice.DeviceHash);
-                    if (activation != null) activation.isActive = true;
-                    else
-                    {
-                        throw new Exception("activation is null");
-                        
-                    }
+                    activation.isActive = true;
                     db.SaveChanges();
                 }
                 catch (Exception e)
                 {
                     LogException(e);
-                    throw;
+                    throw new HttpException(500, "Card activation error");
                 }
             }
         }
@@ -192,7 +189,7 @@ namespace PayAPI.Business
                 catch (Exception e)
                 {
                     LogException(e);
-                    return false;
+                    throw new HttpException(500, "PIN is not exist");
                 }
             }
         }
@@ -208,7 +205,7 @@ namespace PayAPI.Business
                 catch (Exception e)
                 {
                     LogException(e);
-                    return false;
+                    throw new HttpException(500, "Cannot check device status");
                 }
             }
         }
@@ -279,7 +276,7 @@ namespace PayAPI.Business
                 catch (Exception e)
                 {
                     LogException(e);
-                    return new List<Guid>();
+                    throw new HttpException(500, "Token Generation Error");
                 }
             }
         }
@@ -311,7 +308,7 @@ namespace PayAPI.Business
                     catch (Exception e)
                     {
                         LogException(e);
-                        return tokenDict;
+                        throw new HttpException(500, "Token Generation Error");
                     }
                 }
                 return tokenDict;
@@ -394,7 +391,8 @@ namespace PayAPI.Business
                 catch (Exception e)
                 {
                     LogException(e);
-                    return false;
+                    throw new HttpException(500, "It's not possible to transfer money");
+
                 }
             }
 
@@ -415,7 +413,8 @@ namespace PayAPI.Business
                 catch (Exception e)
                 {
                     LogException(e);
-                    return false;
+                    throw new HttpException(500, "Token Is not valid");
+
                 }
             }
 

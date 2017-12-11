@@ -7,6 +7,7 @@ using PayAPI.OutputModels;
 using static PayAPI.Business.ClientProcesses;
 using static PayAPI.Business.ServiceProcesses;
 using System.Linq;
+using System.Web;
 
 namespace PayAPI.Controllers
 {
@@ -22,43 +23,31 @@ namespace PayAPI.Controllers
         [HttpPost]
         public bool AddCard([FromBody] CardInfo info)
         {
-            try
-            {
-                if (!AreCredantialsValid(info.CardId, info.CVV, info.CardHolderName) || !CardExist(info.CardId))
-                    return false;
+
+                AreCredantialsValid(info.CardId, info.CVV, info.CardHolderName);
+                CardExist(info.CardId);
+
                 var code = GenerateAuthorizationCode(info.CardId); // random 213221
                 SendAuthorizationCode(code, info.CardId); // via pin or email
                 ConnectCardAndDevice(info.CardId, info.DeviceHash); // add device into cards device dict 
                 return true; //access granted
-            }
-            catch (Exception e)
-            {
-                LogException(e); // into log 
-                return false;
-            }
         }
 
         [HttpPost]
         public bool ConfirmCardBy([FromBody] AuthorizationInfo info)
         {
-            if (IsBloked(info.DeviceHash)) return false; // // also rise an exception
+            IsBloked(info.DeviceHash); // // also rise an exception
             if (!CheckPinExistance(info.CardId, info.PIN))
             {
                 AggregateDDosFor(info.DeviceHash); //WrongInputCount++
                 if (DDosLimitReached(info.DeviceHash)) BanDevice(info.DeviceHash); // also rise an exception
-                return false;
+                throw new HttpException(500, "Device is banned");
             }
-            try
-            {
-                ActivateCard(info.CardId, info.DeviceHash);
-                return true;
-            }
-            catch (Exception e)
-            {
-                LogException(e); // into log 
-                return false;
-            }
+            ActivateCard(info.CardId, info.DeviceHash);
+            return true;
+
         }
+
 
         [HttpPost]
         public List<Guid> RefreshTokenSet([FromBody] InstanceInfo info)
@@ -76,9 +65,8 @@ namespace PayAPI.Controllers
         [HttpPost]
         public bool AddTransaction([FromBody] NewTransaction info)
         {
-            if (!(IsTokenValidAndFresh(info.Token) &&
-                  IsPossibleToTransferMoney(info.Token, info.Amount)))
-                return false; // also rise an exception
+            IsTokenValidAndFresh(info.Token);
+            IsPossibleToTransferMoney(info.Token, info.Amount);
             try
             {
                 ExecuteTransaction(info.Token,  info.Amount);
@@ -86,7 +74,7 @@ namespace PayAPI.Controllers
             catch (Exception e)
             {
                 LogException(e); // into log 
-                return false;
+                throw new HttpException(500, "Transatction execution error");
             }
             return true;
         }
@@ -100,9 +88,9 @@ namespace PayAPI.Controllers
             {
                 var list = new List<CardValues>();
                 var cards = db.Activations.Where(x => x.Device.DeviceHash == deviceHash).Select(x => x.Card);
+                if (!cards.Any()) throw new HttpException(500, "Device has no cards");
                 foreach (var card in cards)
                 {
-                    if (!CardExist(card.CardId)) return new List<CardValues>();
                     list.Add(new CardValues { CardId = card.CardId, Value = GetCardValue(card.CardId) });
                 }
                 return list;
