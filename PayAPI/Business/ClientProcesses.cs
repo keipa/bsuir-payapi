@@ -71,6 +71,17 @@ namespace PayAPI.Business
                 }
             }
         }
+        public static void CardAlreadyConnected(string infoCardId, string infoDeviceHash)
+        {
+            using (var db = new BankContext())
+            {
+                var card = GetCardById(infoCardId, db);
+                var device = CreateDeviceIfNotExist(db, infoDeviceHash, card.Owner);
+                if (db.Activations.Any(x => x.Card == card && x.Device == device)) throw new HttpException(500, "Card already connected");
+
+            }
+
+        }
 
         public static void ConnectCardAndDevice(string infoCardId, string infoDeviceHash)
         {
@@ -391,7 +402,7 @@ namespace PayAPI.Business
                 catch (Exception e)
                 {
                     LogException(e);
-                    throw new HttpException(500, "It's not possible to transfer money");
+                    throw new HttpException(500, "Host has not enough money");
 
                 }
             }

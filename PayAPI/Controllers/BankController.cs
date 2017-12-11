@@ -23,16 +23,16 @@ namespace PayAPI.Controllers
         [HttpPost]
         public bool AddCard([FromBody] CardInfo info)
         {
-
-                AreCredantialsValid(info.CardId, info.CVV, info.CardHolderName);
-                CardExist(info.CardId);
-
-                var code = GenerateAuthorizationCode(info.CardId); // random 213221
-                SendAuthorizationCode(code, info.CardId); // via pin or email
-                ConnectCardAndDevice(info.CardId, info.DeviceHash); // add device into cards device dict 
-                return true; //access granted
+            AreCredantialsValid(info.CardId, info.CVV, info.CardHolderName);
+            CardExist(info.CardId);
+            CardAlreadyConnected(info.CardId, info.DeviceHash);
+            var code = GenerateAuthorizationCode(info.CardId); // random 213221
+            SendAuthorizationCode(code, info.CardId); // via pin or email
+            ConnectCardAndDevice(info.CardId, info.DeviceHash); // add device into cards device dict 
+            return true; //access granted
         }
 
+        
         [HttpPost]
         public bool ConfirmCardBy([FromBody] AuthorizationInfo info)
         {
@@ -69,7 +69,7 @@ namespace PayAPI.Controllers
             IsPossibleToTransferMoney(info.Token, info.Amount);
             try
             {
-                ExecuteTransaction(info.Token,  info.Amount);
+                ExecuteTransaction(info.Token, info.Amount);
             }
             catch (Exception e)
             {
@@ -88,7 +88,7 @@ namespace PayAPI.Controllers
             {
                 var list = new List<CardValues>();
                 var cards = db.Activations.Where(x => x.Device.DeviceHash == deviceHash).Select(x => x.Card);
-                if (!cards.Any()) throw new HttpException(500, "Device has no cards");
+                if (!cards.Any()) return new List<CardValues>();
                 foreach (var card in cards)
                 {
                     list.Add(new CardValues { CardId = card.CardId, Value = GetCardValue(card.CardId) });
@@ -117,6 +117,6 @@ namespace PayAPI.Controllers
         }
 
 
-      
+
     }
 }
