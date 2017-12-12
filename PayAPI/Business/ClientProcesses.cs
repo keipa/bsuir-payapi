@@ -19,19 +19,21 @@ namespace PayAPI.Business
         public static readonly int TokenSetCount = Convert.ToInt32(ConfigurationManager.AppSettings["TokenSetCount"]);
         public static readonly int ExpireAfterMinutes = Convert.ToInt32(ConfigurationManager.AppSettings["ExpireAfterNminutes"]);
 
-        public static bool AreCredantialsValid(string infoCardId, int infoCvv, string infoCardHolderName)
+        public static void AreCredantialsValid(string infoCardId, int infoCvv, string infoCardHolderName)
         {
             using (var db = new BankContext())
             {
                 try
                 {
                     var card = GetCardById(infoCardId, db);
-                    return card.CVV == infoCvv && card.Owner.Name == infoCardHolderName;
+                    if (card == null) throw new HttpException(500, "card is not exist");
+                    if (!( card.CVV == infoCvv && card.Owner.Name == infoCardHolderName)) throw new HttpException(500, "cvv or owner is invalid");
+
                 }
                 catch (Exception e)
                 {
                     LogException(e);
-                    throw new HttpException(500, "Credentials are invalid");
+                    throw;
                 }
             }
         }
@@ -429,7 +431,7 @@ namespace PayAPI.Business
                 catch (Exception e)
                 {
                     LogException(e);
-                    throw new HttpException(500, "token is not connected with card");
+                    throw e;
 
                 }
             }

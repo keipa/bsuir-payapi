@@ -24,7 +24,6 @@ namespace PayAPI.Controllers
         public bool AddCard([FromBody] CardInfo info)
         {
             AreCredantialsValid(info.CardId, info.CVV, info.CardHolderName);
-            CardExist(info.CardId);
             CardAlreadyConnected(info.CardId, info.DeviceHash);
             var code = GenerateAuthorizationCode(info.CardId); // random 213221
             SendAuthorizationCode(code, info.CardId); // via pin or email
