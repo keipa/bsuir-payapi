@@ -445,7 +445,7 @@ namespace PayAPI.Business
                     var token = db.Tokens.FirstOrDefault(x => x.Value.ToString() == infoToken);
                     bool exist = db.Tokens.Any(x => x.Value.ToString() == infoToken);
                     bool notUsed = !token.Used;
-                    bool fresh = token.ExpiredDate <= DateTime.Now;
+                    bool fresh = token.ExpiredDate >= DateTime.Now;
                     if (!(notUsed && fresh && exist)) throw new HttpException(500, "Token Is not valid or expired or already used");
                 }
                 catch (Exception e)

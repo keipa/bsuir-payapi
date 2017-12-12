@@ -102,7 +102,7 @@ namespace PayAPI.Controllers
         [HttpPost]
         public bool DeleteCard([FromBody] CardInfo info)
         {
-            if (!AreCredantialsValid(info.CardId, info.CVV, info.CardHolderName) || !CardExist(info.CardId))
+            if (!CardExist(info.CardId))
                 throw new HttpException(500, "Credantials error");
             try
             {
