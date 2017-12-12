@@ -79,7 +79,7 @@ namespace PayAPI.Business
             {
                 var card = GetCardById(infoCardId, db);
                 var device = CreateDeviceIfNotExist(db, infoDeviceHash, card.Owner);
-                if (db.Activations.Any(x => x.Card.CardId == card.CardId && x.Device.DeviceHash == device.DeviceHash && !x.isActive)) throw new HttpException(500, "Card already connected");
+                if (db.Activations.Any(x => x.Card.CardId == card.CardId && x.Device.DeviceHash == device.DeviceHash && x.isActive)) throw new HttpException(500, "Card already connected");
 
             }
 
@@ -95,7 +95,7 @@ namespace PayAPI.Business
                     var device = CreateDeviceIfNotExist(db, infoDeviceHash, card.Owner);
                     if (AreAnyDevicesConnected(db, card, device))
                     {
-                        db.Activations.FirstOrDefault(x => x.Card == card && x.Device == device).isActive = false;
+                        db.Activations.FirstOrDefault(x => x.Card.CardId == card.CardId && x.Device.DeviceHash == device.DeviceHash).isActive = false;
                     }
                     else
                     {
